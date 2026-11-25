@@ -159,10 +159,10 @@ pub(crate) fn shown(name: &str) -> String {
 
 /// [`shown`] in one named language. See [`say`].
 fn shown_in(name: &str, lang: Lang) -> String {
+    const COPY_SUFFIX: &str = " (cópia)";
     if lang == Lang::Pt {
         return name.to_owned();
     }
-    const COPY_SUFFIX: &str = " (cópia)";
     let mut base = name;
     let mut copies = 0;
     while let Some(original) = base.strip_suffix(COPY_SUFFIX) {
