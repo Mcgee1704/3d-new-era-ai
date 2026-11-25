@@ -148,18 +148,34 @@ pub(crate) fn dynamic(pt: &str) -> String {
     translated(pt, lang()).unwrap_or(pt).to_owned()
 }
 
-/// A name that lives in the project, as the window shows it. The defaults
-/// the project starts with ("Nova casa", "Versão 1", "Versão 1 (cópia)") and
-/// the catalog names pieces are placed under are Portuguese in the file; on
-/// screen they follow the window's language. A name somebody typed is theirs
-/// and stays as it is.
+const COPY_SUFFIX: &str = " (cópia)";
+
+/// Display a saved name that can be a catalog label or a generated default.
 pub(crate) fn shown(name: &str) -> String {
     shown_in(name, lang())
 }
 
+/// Only generated default patterns are localized for project titles.
+pub(crate) fn shown_home(name: &str) -> String {
+    shown_home_in(name, lang())
+}
+
+fn shown_home_in(name: &str, lang: Lang) -> String {
+    let base = name.trim_end_matches(COPY_SUFFIX);
+    if base == "Nova casa" || version_number(base).is_some() {
+        shown_in(name, lang)
+    } else {
+        name.to_owned()
+    }
+}
+
+fn version_number(name: &str) -> Option<&str> {
+    name.strip_prefix("Versão ")
+        .filter(|n| !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()))
+}
+
 /// [`shown`] in one named language. See [`say`].
 fn shown_in(name: &str, lang: Lang) -> String {
-    const COPY_SUFFIX: &str = " (cópia)";
     if lang == Lang::Pt {
         return name.to_owned();
     }
@@ -169,10 +185,7 @@ fn shown_in(name: &str, lang: Lang) -> String {
         base = original;
         copies += 1;
     }
-    let mut shown = if let Some(n) = base.strip_prefix("Versão ")
-        && !n.is_empty()
-        && n.chars().all(|c| c.is_ascii_digit())
-    {
+    let mut shown = if let Some(n) = version_number(base) {
         fill_in("Versão {}", lang, &[&n])
     } else {
         translated(base, lang).unwrap_or(base).to_owned()
@@ -2325,6 +2338,27 @@ mod tests {
             }
         }
         missing
+    }
+
+    #[test]
+    fn home_names_only_localize_generated_defaults() {
+        assert_eq!(shown_home_in("Cozinha", Lang::De), "Cozinha");
+        assert_eq!(
+            shown_home_in("Cozinha (cópia)", Lang::De),
+            "Cozinha (cópia)"
+        );
+        assert_eq!(shown_home_in("Nova casa", Lang::De), "Neues Projekt");
+        assert_eq!(
+            shown_home_in("Nova casa (cópia)", Lang::De),
+            "Neues Projekt (Kopie)"
+        );
+        assert_eq!(
+            shown_home_in("Versão 12 (cópia)", Lang::De),
+            "Version 12 (Kopie)"
+        );
+        assert_eq!(shown_home_in("Versão final", Lang::De), "Versão final");
+        assert_eq!(shown_in("Cozinha", Lang::De), "Küche");
+        assert_eq!(say("Contínuo", Lang::De), "Durchgezogen");
     }
 
     #[test]

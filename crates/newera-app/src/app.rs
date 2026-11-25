@@ -2502,7 +2502,7 @@ impl NewEraApp {
     fn update_title(&mut self, ctx: &egui::Context) {
         let doc = self.document.read();
         let file = doc.path().and_then(Path::file_name).map_or_else(
-            || crate::i18n::shown(&doc.home().name),
+            || crate::i18n::shown_home(&doc.home().name),
             |n| n.to_string_lossy().into_owned(),
         );
         let title = format!(

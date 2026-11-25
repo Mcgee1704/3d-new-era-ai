@@ -223,7 +223,7 @@ pub(super) fn translation(pt: &str) -> Option<&'static str> {
             "Genaue Länge der gerade gezeichneten Wand"
         }
         "Contorno" => "Umriss",
-        "Contínuo" => "Ausgefüllt",
+        "Contínuo" => "Durchgezogen",
         "Copiar" => "Kopieren",
         "Copiar · Recortar · Colar · Duplicar" => {
             "Kopieren · Ausschneiden · Einfügen · Duplizieren"
